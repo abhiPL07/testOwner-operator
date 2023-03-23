@@ -28,8 +28,10 @@ type TestDependentSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of TestDependent. Edit testdependent_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Labels has the label containing message from TestOwner
+	Labels metav1.LabelSelector `json:"labels,omitempty"`
+	// OwnerField has the message from the owner of TestDependent. Edit testdependent_types.go to remove/update
+	OwnerField string `json:"ownerField,omitempty"`
 }
 
 // TestDependentStatus defines the observed state of TestDependent

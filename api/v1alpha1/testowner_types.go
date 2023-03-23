@@ -28,8 +28,8 @@ type TestOwnerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of TestOwner. Edit testowner_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// ownerField has a message from TestOwner. Edit testowner_types.go to remove/update
+	OwnerField string `json:"ownerField,omitempty"`
 }
 
 // TestOwnerStatus defines the observed state of TestOwner

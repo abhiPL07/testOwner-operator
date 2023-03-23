@@ -8,6 +8,32 @@ rules:
 - apiGroups:
   - test.github.com
   resources:
+  - testdependents
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - test.github.com
+  resources:
+  - testdependents/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - test.github.com
+  resources:
+  - testdependents/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - test.github.com
+  resources:
   - testowners
   verbs:
   - create

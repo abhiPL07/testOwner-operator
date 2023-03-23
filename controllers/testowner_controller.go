@@ -58,44 +58,59 @@ type TestOwnerReconciler struct {
 func (r *TestOwnerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := ctrllog.FromContext(ctx)
 
+	log.Info("Reconciler start")
+
 	// TODO(user): your logic here
 	// Get Testowner instances
 	testOwner := &testv1alpha1.TestOwner{}
 	err := r.Get(ctx, req.NamespacedName, testOwner)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("Creating TestOwner object\n")
+			log.Info("TestOwner object was deleted\n")
 			return ctrl.Result{}, nil
 		}
 		log.Error(err, "Error getting TestOwner objects\n")
 		return ctrl.Result{}, err
 	}
 
-	// Check if TestDependent instance exists, update ownerField if it does, else create one
-	found := &testv1alpha1.TestDependent{}
-	err = r.Get(ctx, types.NamespacedName{Name: found.Name, Namespace: found.Namespace}, found)
+	// Check if dependentList is empty
+	dependentList := &testv1alpha1.TestDependentList{}
+	listOpts := []client.ListOption{
+		client.MatchingLabels(labelsForDependent(testOwner.Name)),
+	}
+	err = r.List(ctx, dependentList, listOpts...)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			testDependent := r.makeDependent(testOwner)
-			if err = r.Create(ctx, testDependent); err != nil {
-				log.Error(err, "Failed to create TestDependent\n")
-				return ctrl.Result{}, err
-			}
-			*found = *testDependent
-			return ctrl.Result{Requeue: true}, nil
-		} else {
-			log.Error(err, "Failed to get instance of TestDependent\n")
+		return ctrl.Result{}, err
+	}
+	dependentNames := getDependentNames(dependentList.Items)
+	// If no test-dependent exists, create test-dependent
+	if len(dependentNames) == 0 {
+		dependent := r.makeDependent(testOwner)
+		err := r.Create(ctx, dependent)
+		if err != nil {
 			return ctrl.Result{}, err
 		}
-	}
+		return ctrl.Result{Requeue: true}, nil
+	} else {
+		// Else update label
+		dependentName := dependentNames[0]
+		dependent := &testv1alpha1.TestDependent{}
+		err := r.Get(ctx, types.NamespacedName{Name: dependentName, Namespace: testOwner.Namespace}, dependent)
+		if err != nil {
+			log.Error(err, "Error fetching instance\n")
+			return ctrl.Result{}, err
+		}
+		if testOwner.Spec.OwnerField == dependent.Spec.OwnerField {
+			return ctrl.Result{Requeue: true}, nil
+		}
+		res, err := r.updateOwnerField(ctx, testOwner, dependent)
+		if err != nil {
+			log.Error(err, "Error updating ownerField")
+			return res, err
+		}
+		return res, nil
 
-	// Update TestDependent spec if it does not match owner
-	if res, err := r.updateOwnerField(ctx, testOwner, found); err != nil {
-		log.Error(err, "Failed to update ownerField")
-		return res, err
 	}
-
-	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -137,4 +152,12 @@ func (r *TestOwnerReconciler) updateOwnerField(ctx context.Context, testOwner *t
 		}
 	}
 	return ctrl.Result{Requeue: true}, nil
+}
+
+func getDependentNames(dependents []testv1alpha1.TestDependent) []string {
+	var dependentNames []string
+	for _, dependent := range dependents {
+		dependentNames = append(dependentNames, dependent.Name)
+	}
+	return dependentNames
 }

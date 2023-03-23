@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,10 +109,9 @@ func (r *TestOwnerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 func (r *TestOwnerReconciler) makeDependent(testOwner *testv1alpha1.TestOwner) *testv1alpha1.TestDependent {
 	lbls := labelsForDependent(testOwner.Name)
 	ownerField := testOwner.Spec.OwnerField
-	testDependentname := fmt.Sprintf("%sDependent", testOwner.Name)
 	testDependent := &testv1alpha1.TestDependent{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      testDependentname,
+			Name:      "test-dependent",
 			Namespace: testOwner.Namespace,
 			Labels:    lbls,
 		},

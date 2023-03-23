@@ -13,8 +13,6 @@ spec:
     listKind: TestDependentList
     plural: testdependents
     singular: testdependent
-    shortNames:
-    - td
   scope: Namespaced
   versions:
   - name: v1alpha1

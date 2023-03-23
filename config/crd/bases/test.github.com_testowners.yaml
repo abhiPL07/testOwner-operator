@@ -13,8 +13,6 @@ spec:
     listKind: TestOwnerList
     plural: testowners
     singular: testowner
-    shortNames:
-    - to
   scope: Namespaced
   versions:
   - name: v1alpha1

@@ -1,0 +1,12 @@
+apiVersion: test.github.com/v1alpha1
+kind: TestOwner
+metadata:
+  labels:
+    app.kubernetes.io/name: testowner
+    app.kubernetes.io/instance: testowner-sample
+    app.kubernetes.io/part-of: testowner-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: testowner-operator
+  name: testowner-sample
+spec:
+  # TODO(user): Add fields here
